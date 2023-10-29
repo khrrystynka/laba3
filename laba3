@@ -1,0 +1,250 @@
+// UV1...
+
+//#include "stdafx.h"  // 4
+#include<iostream>
+#include<fstream>
+#include<math.h>
+
+using namespace std;
+// all function
+double max(double a, double b, double c, double d)
+{
+	double t, r;
+	t = a>b ? a : b;
+	r = c>d ? c : d;
+	return t>r ? t : r;
+}
+double min(double a, double b, double c, double d)
+{
+	double t, r;
+	t = a<b ? a : b;
+	r = c<d ? c : d;
+	return t<r ? t : r;
+}
+double max(double a, double b, double c)
+{
+	double t;
+	t = a>b ? a : b;
+	return t>c ? t : c;
+}
+double min(double a, double b, double c)
+{
+	double t;
+	t = a<b ? a : b;
+	return t<c ? t : c;
+}
+double max(double a, double b)
+{
+	return a>b ? a : b;
+}
+double min(double a, double b)
+{
+	return a<b ? a : b;
+}
+
+// function for test 
+// user code
+//
+// 
+double Sum_x2(double next)
+{
+	static double sum = 0;
+	sum += next * next;
+	return sum;
+}
+double Sum_y2(double next)
+{
+	static double sum = 0;
+	sum += next * next;
+	return sum;
+}
+double Sum_z2(double next)
+{
+	static double sum = 0;
+	sum += next * next;
+	return sum;
+}
+double Sum_u2(double next)
+{
+	static double sum = 0;
+	sum += next * next;
+	return sum;
+}
+// sxu,sxu2,sxum,syu, szum
+double Sum_xu(double next)
+{
+	static double sum = 0;
+	sum += next;
+	return sum;
+}
+double Sum_xum(double next)
+{
+	static double sum = 0;
+	sum += fabs(next);
+	return sum;
+}
+double Sum_xu2(double next)
+{
+	static double sum = 0;
+	sum += next * next;
+	return sum;
+}
+double Sum_yum(double next)
+{
+	static double sum = 0;
+	sum += fabs(next);
+	return sum;
+}
+double Sum_yu(double next)
+{
+	static double sum = 0;
+	sum += next;
+	return sum;
+}
+double Sum_zum(double next)
+{
+	static double sum = 0;
+	sum += fabs(next);
+	return sum;
+}
+double Sum_zum1(double next)
+{
+	static double sum = 0;
+	sum += fabs(next) + next;
+	return sum;
+}
+
+
+// 270 -   user line 120
+void liash(int n, double a, double b, double c, double d,
+	double x0, double y0, double z0, double u0,
+	double x1, double y1, double z1, double u1,
+	double& xr, double& yr, double& zr, double& ur)
+{
+	double  x[3], y[3], z[3], u[3];
+	double ztmp, mtmp;
+	int i, j, k;
+	x[0] = x0; y[0] = y0; z[0] = z0; u[0] = u0;
+	x[1] = x1; y[1] = y1; z[1] = z1; u[1] = u1;
+	Sum_x2(x[0]);
+	Sum_y2(y[0]);
+	Sum_z2(z[0]);
+	Sum_u2(u[0]);
+	Sum_xu(x[0] + u[0]);
+	Sum_xum(x[0] - u[0]);
+	Sum_yu(y[0] + u[0]);
+	Sum_zum(x[0] - u[0]);
+	for (i = 2; i < n; i++) {
+		Sum_x2(x[1]);
+		Sum_y2(y[1]);
+		Sum_z2(z[1]);
+		Sum_u2(u[1]);
+		Sum_xu(x[2] + u[1]);
+		Sum_xum(x[2] - u[1]);
+		Sum_yu(y[1] + u[1]);
+		Sum_zum(x[1] - u[1]);
+		// xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+		x[2] = 0;
+		x[2] += a * (y[0] + x[0] + x[1]) + b * y[1];
+		x[2] += z[1] < u[1] ? d * u[1] : c * z[1];
+		x[2] += x[0] > y[0] ? a * max(x[1], z[1], u[1]) : d * min(x[0], z[0], u[1]);  //   d * min(x[1], z[1], u[1]);
+		ztmp = 1 - Sum_x2(0) + fabs(min(y[1], z[1], u[1], y[0]));
+		x[2] /= ztmp;
+		//    yyyyyyyyyyyyyyyyyyyyyyyy
+		y[2] = 0;
+		y[2] -= b * (y[0] + y[1] + x[2]) - b * x[2];
+		y[2] += x[1] < u[1] ? d * u[0] : c * z[1];
+		y[2] -= u[0] > y[0] ? a * min(x[1], z[1], u[1]) : c * max(x[1], z[1], u[1]);
+		ztmp = 1 + Sum_y2(0) + fabs(min(x[1], z[1], u[1], y[0]) + max(x[2], z[1], u[1], z[0]));    //  gSum_y2(x[1])
+		y[2] /= ztmp;
+		// zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
+		z[2] = 0;
+		z[2] += c * (z[0] + y[2]) - b * z[1];
+		mtmp = max(x[0], u[1]);
+		if (a>b) z[0] += c * u[0];
+		else if (b> mtmp && mtmp > a) {
+			z[2] += Sum_xu(0);
+		}
+		else if (mtmp < a) {
+			z[2] += Sum_xum(0);
+		}
+		else z[0] += 0;
+		z[2] += u[0] < y[0] ? a * x[1] : c * z[1];
+		ztmp = 1 + Sum_z2(0) + fabs(min(x[1], y[2], u[1], y[0]) + max(x[2], z[1], u[1], z[0])); ///
+		z[2] /= ztmp;
+		//  uuuuuuuuuuuuuuuuuuuuuuu
+		u[2] = 0;
+		u[2] += fabs(d*u[1] + a * b*x[1]);
+		mtmp = max(x[0], u[2]);
+		if (b + u[0] <= u[1])
+			z[2] += d * u[0] + a;
+		if (b + u[0]>  mtmp  && mtmp > u[1]) {
+			z[2] += Sum_yu(0);
+		}
+		else if (mtmp > u[1]) {
+			z[2] += Sum_zum(0);
+		}
+		else z[2] += Sum_yum(0);
+		u[2] += u[0] < y[0] ? a * x[1] : c * z[1];
+		ztmp = 1 + Sum_z2(0) + (a + b + c) / (1 + Sum_xu2(0));
+		u[2] /= ztmp;
+		//
+		x[0] = x[1];
+		x[1] = x[2];
+		y[0] = y[1];
+		y[1] = y[2];
+		z[0] = z[1];
+		z[1] = z[2];
+		u[0] = u[1];
+		u[1] = u[2];
+	} //  for i
+	xr = x[2]; yr = y[2];  zr = z[2]; ur = u[2];
+	return;
+}
+// *********************************************************************/
+// main 
+//*********************************************************************/
+int main()
+{
+	double a, b, c, d, x[3], y[3], z[3], u[3];
+	double x1, y1, z1, u1;
+	double x2, y2, z2, u2;
+	double ztmp, mtmp;
+	int n, nt, i, j, k, it;
+	int cnx = 0, cny = 0, cnz = 0, cnu = 0;
+	ifstream ins("ins.dat");
+	ofstream outs("gout.dat");
+
+	if (!ins.is_open()) {
+		cout << " file not open \n";  return -1;
+	}
+	if (!outs.is_open()) {
+		cout << " file not open  outs \n";  return -1;
+	}
+	ins >> nt;
+	outs << nt << endl;
+	for (it = 0; it < nt; it++) {
+		ins >> n;
+		ins >> a >> b >> c >> d;
+		ins >> x[0] >> y[0] >> z[0] >> u[0];
+		ins >> x[1] >> y[1] >> z[1] >> u[1];
+		//	cout << " n  " << n << " begin " << endl;
+		//  cout << " x " << x[0] << " y " << y[0] << " z " << y[0] << " u " << u[0] << endl;
+		//  cout << " x " << x[1] << " y " << y[1] << " z " << y[1] << " u " << u[1] << endl;
+
+		liash(n, a, b, c, d, x[0], y[0], z[0], u[0], x[1], y[1], z[1], u[1],
+			x2, y2, z2, u2);
+
+		outs << " Test   " << it << " n = " << n << " end " << endl;
+		outs << " x " << x2 << " y " << y2 << " z " << z2 << " u " << u2 << endl;
+		cout << " Test   " << it << " n = " << n << " end " << endl;
+		cout << " x " << x2 << " y " << y2 << " z " << z2 << " u " << u2 << endl;
+
+	} // it
+
+    outs.close();
+	return 0;
+}
+
+
+
